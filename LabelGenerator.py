@@ -13,6 +13,7 @@ import sys
 from typing import Tuple, Union, Optional, List, Mapping
 
 ResistorList = Union[List[float], List[Union[Optional[float], List[Optional[float]]]]]
+body_color = "Yellow1"
 
 
 def load_font(font_name: str) -> None:
@@ -73,6 +74,21 @@ class PaperConfig:
         self.num_stickers_vertical = num_stickers_vertical
 
 
+PLAIN_AVERY_5260 = PaperConfig(
+    paper_name="Plain Avery 5260",
+    pagesize=A4,
+    sticker_width=0.5 * (2 + 5/8) * inch,
+    sticker_height=1 * inch,
+    sticker_corner_radius=0.1 * inch,
+    left_margin=3/16 * inch,
+    top_margin=0.5 * inch,
+    horizontal_stride=0.5 * (2 + 5/8) * inch,
+    vertical_stride=1 * inch,
+    num_stickers_horizontal=6,
+    num_stickers_vertical=10,
+)
+
+
 AVERY_5260 = PaperConfig(
     paper_name="Avery 5260",
     pagesize=LETTER,
@@ -124,7 +140,7 @@ class StickerRect:
         self.bottom = layout.pagesize[1] - (
             layout.sticker_height + layout.top_margin + layout.vertical_stride * row
         )
-        self.width = layout.sticker_width
+        self.width  = layout.sticker_width
         self.height = layout.sticker_height
         self.corner = layout.sticker_corner_radius
 
@@ -134,12 +150,12 @@ class StickerRect:
     def __enter__(self) -> "StickerRect":
 
         if self._mirror:
-            pagewidth = self._c._pagesize[0]
+            pagewidth  = self._c._pagesize[0]
             pageheight = self._c._pagesize[1]
             self._c.saveState()
             self._c.translate(pagewidth, pageheight)
             self._c.rotate(180)
-            self.left = pagewidth - self.left - self.width
+            self.left   = pagewidth  - self.left   - self.width
             self.bottom = pageheight - self.bottom - self.height
 
         return self
@@ -237,12 +253,12 @@ def resistor_color_table(num: int) -> HexColor:
 
 def tolerance_color_table(tolerance_value: Optional[float]) -> int:
     tolerance_colors: Mapping[Optional[float], int] = {
-        1: 1,  # brown
-        2: 2,  # red
+        1: 1,    # brown
+        2: 2,    # red
         0.5: 5,  # green
-        0.25: 6,  # blue
+        0.25: 6, # blue
         0.1: 7,  # violet
-        5: -1,  # gold
+        5: -1,   # gold
         10: -2,  # silver
     }
 
@@ -515,7 +531,7 @@ def draw_resistor_sticker(
             c.setLineWidth(0.7)
             c.line(rect.left,
                    rect.bottom + rect.height/2,
-                   rect.left + rect.width,
+                   rect.left   + rect.width,
                    rect.bottom + rect.height/2)
 
         # Draw resistor value
@@ -523,17 +539,17 @@ def draw_resistor_sticker(
         print("Generating sticker '{}'".format(resistor_value.format_value()))
 
         value_font_size = 0.25 * inch
-        ohm_font_size = 0.15 * inch
-        smd_font_size = 0.08 * inch
+        ohm_font_size = 0.2 * inch
+        smd_font_size = 0.1 * inch
         space_between = 5
 
         value_string = resistor_value.format_value()
         ohm_string = "\u2126"
         value_width = c.stringWidth(value_string, 'Arial Bold', value_font_size * 1.35)
-        ohm_width = c.stringWidth(ohm_string, 'Arial Bold', ohm_font_size * 1.35)
+        ohm_width =   c.stringWidth(ohm_string,   'Arial Bold', ohm_font_size * 1.35)
         total_text_width = ohm_width + value_width + space_between
-        text_left = rect.left + rect.width/4 - total_text_width/2
-        text_bottom = rect.bottom + rect.height/4 - value_font_size/2
+        text_left = rect.left + rect.width/2 - total_text_width/2
+        text_bottom = rect.bottom + rect.height * 3/4 - value_font_size/2
 
         c.setFont('Arial Bold', value_font_size * 1.35)
         c.drawString(text_left, text_bottom, value_string)
@@ -541,26 +557,37 @@ def draw_resistor_sticker(
         c.drawString(text_left + value_width + space_between, text_bottom, ohm_string)
 
         # Draw resistor color code
-        draw_resistor_colorcode(c, resistor_value,
-                                toColor("hsl(55, 54%, 100%)"), toColor("hsl(55, 54%, 70%)"),
-                                rect.left + rect.width/2,
-                                rect.bottom + rect.height/4 - rect.height/45,
-                                rect.width/4, rect.height/4,
-                                3, tolerance)
-
-        draw_resistor_colorcode(c, resistor_value,
-                                toColor("hsl(197, 59%, 100%)"), toColor("hsl(197, 59%, 73%)"),
-                                rect.left + rect.width * 0.75,
-                                rect.bottom + rect.height/4 - rect.height/45,
-                                rect.width/4, rect.height/4,
-                                4, tolerance)
+        if body_color == "Yellow":
+            # Yellow
+            draw_resistor_colorcode(c, resistor_value,
+                                    toColor("hsl(55, 54%, 100%)"), toColor("hsl(55, 54%, 70%)"),
+                                    # rect.left + rect.width/2,
+                                    rect.left,
+                                    rect.bottom + rect.height/4 - rect.height/45,
+                                    rect.width/1, rect.height/4,
+                                    3, tolerance)
+        else:
+            # Blue
+            draw_resistor_colorcode(c, resistor_value,
+                                    toColor("hsl(197, 59%, 100%)"), toColor("hsl(197, 59%, 73%)"),
+                                    # rect.left + rect.width * 0.75,
+                                    rect.left,
+                                    rect.bottom + rect.height/4 - rect.height/45,
+                                    rect.width/1, rect.height/4,
+                                    4, tolerance)
 
         c.setFont('Arial Bold', smd_font_size * 1.35)
-        c.drawString(rect.left + rect.width/2 + rect.width/32, rect.bottom +
+#        c.drawString(rect.left + rect.width/2 + rect.width/32, rect.bottom +
+#                     rect.height/13, get_3digit_code(resistor_value))
+#        c.drawCentredString(rect.left + rect.width*3/4, rect.bottom +
+#                            rect.height/13, get_4digit_code(resistor_value))
+#        c.drawRightString(rect.left + rect.width - rect.width/32, rect.bottom +
+#                          rect.height/13, get_eia98_code(resistor_value))
+        c.drawString(rect.left + rect.width/16, rect.bottom +
                      rect.height/13, get_3digit_code(resistor_value))
-        c.drawCentredString(rect.left + rect.width*3/4, rect.bottom +
+        c.drawCentredString(rect.left + rect.width*1/2, rect.bottom +
                             rect.height/13, get_4digit_code(resistor_value))
-        c.drawRightString(rect.left + rect.width - rect.width/32, rect.bottom +
+        c.drawRightString(rect.left + rect.width*1/1 - rect.width/16, rect.bottom +
                           rect.height/13, get_eia98_code(resistor_value))
 
 
@@ -686,7 +713,8 @@ def main() -> None:
     # ############################################################################
     # Select the correct type of paper you want to print on.
     # ############################################################################
-    layout = AVERY_5260
+    layout = PLAIN_AVERY_5260
+    # layout = AVERY_5260
     # layout = AVERY_L7157
     # layout = EJ_RANGE_24
 
@@ -731,7 +759,7 @@ def main() -> None:
     # 5:    5%      gold
     # 10:   10%     silver
     # ############################################################################
-    tolerance_value = None
+    tolerance_value = 5
     # tolerance_value = 1  # in percentage
 
     # ############################################################################
@@ -746,12 +774,12 @@ def main() -> None:
 
     # Draws the line where the stickers should be folded.
     # Disable this if you don't like the line.
-    draw_center_line = True
+    draw_center_line = False
 
     # Draw the outlines of the stickers.
     # This is primarily a debugging option and should most likely not be enabled
     # for the actual printing.
-    draw_outlines = False
+    draw_outlines = True
 
     # ############################################################################
     # PDF generation
