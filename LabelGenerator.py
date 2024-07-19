@@ -13,7 +13,6 @@ import sys
 from typing import Tuple, Union, Optional, List, Mapping
 
 ResistorList = Union[List[float], List[Union[Optional[float], List[Optional[float]]]]]
-body_color = "Yellow1"
 
 
 def load_font(font_name: str) -> None:
@@ -557,24 +556,23 @@ def draw_resistor_sticker(
         c.drawString(text_left + value_width + space_between, text_bottom, ohm_string)
 
         # Draw resistor color code
-        if body_color == "Yellow":
-            # Yellow
-            draw_resistor_colorcode(c, resistor_value,
-                                    toColor("hsl(55, 54%, 100%)"), toColor("hsl(55, 54%, 70%)"),
-                                    # rect.left + rect.width/2,
-                                    rect.left,
-                                    rect.bottom + rect.height/4 - rect.height/45,
-                                    rect.width/1, rect.height/4,
-                                    3, tolerance)
-        else:
-            # Blue
-            draw_resistor_colorcode(c, resistor_value,
-                                    toColor("hsl(197, 59%, 100%)"), toColor("hsl(197, 59%, 73%)"),
-                                    # rect.left + rect.width * 0.75,
-                                    rect.left,
-                                    rect.bottom + rect.height/4 - rect.height/45,
-                                    rect.width/1, rect.height/4,
-                                    4, tolerance)
+        # Yellow
+        draw_resistor_colorcode(c, resistor_value,
+                                toColor("hsl(55, 54%, 100%)"), toColor("hsl(55, 54%, 70%)"),
+                                # rect.left + rect.width/2,
+                                rect.left,
+                                rect.bottom + rect.height/4 - rect.height/45,
+                                rect.width/2, rect.height/4,
+                                3, tolerance)
+
+        # Blue
+        draw_resistor_colorcode(c, resistor_value,
+                                toColor("hsl(197, 59%, 100%)"), toColor("hsl(197, 59%, 73%)"),
+                                # rect.left + rect.width * 0.75,
+                                rect.left + rect.width/2,
+                                rect.bottom + rect.height/4 - rect.height/45,
+                                rect.width/2, rect.height/4,
+                                4, tolerance)
 
         c.setFont('Arial Bold', smd_font_size * 1.35)
 #        c.drawString(rect.left + rect.width/2 + rect.width/32, rect.bottom +
@@ -743,7 +741,22 @@ def main() -> None:
     # generate_values function.
     # ############################################################################
     # resistor_values: ResistorList = [ 0, 0.01 ] + generate_values(E24_COMMON_VALUES, 0, 6)
-    resistor_values: ResistorList = [0, 0.01, 0.02, 0.03] + generate_values(E12_VALUES+E24_ALL_VALUES, -1, 6) + [1_000_000]
+    resistor_values: ResistorList = [
+        1, 1.2, 1.3, 1.5, 1.6, 1.8, 2, 2.2, 2.4, 2.7, 3, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6,
+        6.2, 6.8, 7.5, 8.2, 9.1, 10, 11, 12, 15, 18, 20, 22, 24, 27, 30, 33, 36, 39, 43, 47,
+        51, 56, 62, 68, 75, 82, 91, 100, 110, 120, 130, 150, 160, 180, 200, 220, 240, 270,
+        300, 330, 360, 390, 430, 470, 510, 560, 620, 680, 750, 820, 910, 0, 0, 0
+    ] + [
+        int(element * 1000) for element in [
+            1, 1.2, 1.3, 1.5, 1.6, 1.8, 2, 2.2, 2.4, 2.7, 3, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6,
+            6.2, 6.8, 7.5, 8.2, 9.1, 10, 11, 12, 15, 18, 20, 22, 24, 27, 30, 33, 36, 39, 43, 47,
+            51, 56, 62, 68, 75, 82, 91, 100, 110, 120, 130, 150, 160, 180, 200, 220, 240, 270,
+            300, 330, 360, 390, 430, 470, 510, 560, 620, 680, 750, 820, 910, 0, 0, 0
+        ]
+    ] + [
+        1e6, 1.2e6, 1.5e6, 1.8e6, 2e6, 2.2e6, 2.4e6, 3e6, 3.3e6,
+        3.9e6, 4.7e6, 5.1e6, 5.6e6, 6.2e6, 6.8e6, 8.2e6, 10e6
+    ]
 
     # ############################################################################
     # Resistor tolerance.
